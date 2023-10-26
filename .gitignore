@@ -1,0 +1,8 @@
+# ignora todo
+*
+!.gitignore
+
+# pero estas carpetas no
+!*/
+!bin/data/*
+!src/*
