@@ -5,29 +5,49 @@
 void ofApp::setup(){
     ofBackground(255);
     
+    viewportIzq.set(0,0,ofGetWidth()/3, ofGetHeight());
+    viewportCent.set(ofGetWidth()/3, 0, ofGetWidth()/3, ofGetHeight());
+    viewportDer.set(ofGetWidth()/3*2, 0, ofGetWidth()/3, ofGetHeight());
+    
     box2d.init();
     box2d.setFPS(60);
     box2d.createBounds();
     box2d.setGravity(0, 0);
+    font.load("monospace", 24);
     
-    
-    // Crea una bola en el centro
-    ball.name = "ball";
+    // Crea las bolas
     ball.setPhysics(1.0, 0.5, 1); // TODO: esto habra que ir ajustandolo (densidad, rebote, rozamiento)
     // TODO: el rozamiento no hace absolutamente nada. La bola no reduce la velocidad, unicamente al rebotar
-    ball.setup(box2d.getWorld(), ofGetWidth() / 2, ofGetHeight() / 2, 20);
+    ball.setup(box2d.getWorld(), ofGetWidth() / 2, ofGetHeight()-20, 20);
+    ballSide.setPhysics(1.0, 0.5, 1);
+    ballSide.setup(box2d.getWorld(), 0, ofGetHeight() / 2, 20);
     shooting = false;
 }
 
 //--------------------------------------------------------------
 void ofApp::update(){
     box2d.update();
+    ballSide.setPosition(ofGetWidth()-ball.getPosition().y*ofGetWidth()/ofGetHeight(),ballSide.getPosition().y);
 }
 
 //--------------------------------------------------------------
 void ofApp::draw(){
     ofSetColor(0);
     ofSetLineWidth(2);
+    
+    // Pantalla izquierda
+    ofPushView();
+    ofViewport(viewportIzq);
+    ofSetColor(0, 0, 0);
+    font.drawString("pantalla\nizquierda", 100,100);
+    //    ballSide.draw();
+    ofDrawLine(ofGetWidth(), 0, ofGetWidth(), ofGetHeight());
+    ofPopView();
+    
+    // Pantalla centro
+    ofPushView();
+    ofViewport(viewportCent);
+    font.drawString("pantalla\ncentral", 100,100);
     
     // Dibuja la linea de apuntado
     if (ball.getVelocity().lengthSquared()==0) {  // Si la bola esta quieta
@@ -43,19 +63,31 @@ void ofApp::draw(){
     ofSetColor(255, 0, 0);
     ball.draw();
     
-    
     // Muestra la potencia del disparo
     if (shooting) {
         float shootPower = Utils::calculateShootPower(mousePressTime);\
-        string powerString = "shoot Power: " + ofToString(shootPower);  // TODO: ponemos esto en porcentaje?
+        string powerString = "Shoot Power: " + ofToString(shootPower);  // TODO: ponemos esto en porcentaje?
         ofSetColor(0, 0, 0);
-        ofDrawBitmapString(powerString, 20, 20);
+        font.drawString(powerString, 100,180);
     }
+    ofPopView();
+    
+    // Pantalla derecha
+    ofPushView();
+    ofViewport(viewportDer);
+    ofSetColor(0, 0, 0);
+    font.drawString("pantalla\nderecha", 100,100);
+    ofDrawLine(0, 0, 0, ofGetHeight());
+    
+    // Dibuja la bola
+    ofSetColor(255, 0, 0);
+    ballSide.draw();
+    ofPopView();
 }
 
 //--------------------------------------------------------------
 void ofApp::contactStart(ofxBox2dContactArgs &e) {
-    
+    // TODO: ver si la bola toca el sensor del hoyo
 }
 
 //--------------------------------------------------------------
@@ -67,9 +99,10 @@ void ofApp::contactEnd(ofxBox2dContactArgs &e) {
 void ofApp::keyPressed(int key){
     if (key == 'r') {  // Reset de la bola a la posicion inicial
         ofLog(OF_LOG_NOTICE, "ball reset");
-        ball.setPosition(ofGetWidth() / 2, ofGetHeight() / 2);
+        ball.setPosition(ofGetWidth() / 2, ofGetHeight()-20);
         ball.setVelocity(0, 0);
         ball.setRotation(0);
+        ballSide.setPosition(0, ofGetHeight() / 2);
         // TODO: arreglar. Si la bola estaba girando se mantiene girando al reiniciarla.
     }
 }
@@ -101,6 +134,7 @@ void ofApp::mousePressed(int x, int y, int button){
 void ofApp::mouseReleased(int x, int y, int button){
     if (shooting) {
         ofLog(OF_LOG_NOTICE, "Mouse click");
+        // TODO: comprobar si x, y estan dentro del viewportCentral y que son x e y relativos a el
         
         ofVec2f direction = ofVec2f(x, y) - ball.getPosition();
         direction.normalize();

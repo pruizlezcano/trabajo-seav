@@ -25,8 +25,14 @@ public:
     void contactStart(ofxBox2dContactArgs &e);
     void contactEnd(ofxBox2dContactArgs &e);
     
+    ofRectangle viewportCent;
+    ofRectangle viewportIzq;
+    ofRectangle viewportDer;
+    ofTrueTypeFont font;
+    
     ofxBox2d box2d;
     ofxBox2dCircle ball;
+    ofxBox2dCircle ballSide;
     Boolean shooting;
     unsigned long mousePressTime;
 };
