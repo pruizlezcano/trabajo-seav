@@ -33,6 +33,6 @@ public:
     ofxBox2d box2d;
     ofxBox2dCircle ball;
     ofxBox2dCircle ballSide;
-    Boolean shooting;
+    Boolean isShooting;
     unsigned long mousePressTime;
 };

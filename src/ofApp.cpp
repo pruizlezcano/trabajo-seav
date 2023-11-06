@@ -21,7 +21,7 @@ void ofApp::setup(){
     ball.setup(box2d.getWorld(), ofGetWidth() / 2, ofGetHeight()-20, 20);
     ballSide.setPhysics(1.0, 0.5, 1);
     ballSide.setup(box2d.getWorld(), 0, ofGetHeight() / 2, 20);
-    shooting = false;
+    isShooting = false;
 }
 
 //--------------------------------------------------------------
@@ -64,7 +64,7 @@ void ofApp::draw(){
     ball.draw();
     
     // Muestra la potencia del disparo
-    if (shooting) {
+    if (isShooting) {
         float shootPower = Utils::calculateShootPower(mousePressTime);\
         string powerString = "Shoot Power: " + ofToString(shootPower);  // TODO: ponemos esto en porcentaje?
         ofSetColor(0, 0, 0);
@@ -87,7 +87,8 @@ void ofApp::draw(){
 
 //--------------------------------------------------------------
 void ofApp::contactStart(ofxBox2dContactArgs &e) {
-    // TODO: ver si la bola toca el sensor del hoyo
+    if(e.a == NULL && e.b == NULL) return;
+    
 }
 
 //--------------------------------------------------------------
@@ -102,6 +103,8 @@ void ofApp::keyPressed(int key){
         ball.setPosition(ofGetWidth() / 2, ofGetHeight()-20);
         ball.setVelocity(0, 0);
         ball.setRotation(0);
+        ballSide.setVelocity(0, 0);
+        ballSide.setRotation(0);
         ballSide.setPosition(0, ofGetHeight() / 2);
         // TODO: arreglar. Si la bola estaba girando se mantiene girando al reiniciarla.
     }
@@ -125,14 +128,14 @@ void ofApp::mouseDragged(int x, int y, int button){
 //--------------------------------------------------------------
 void ofApp::mousePressed(int x, int y, int button){
     if (ball.getVelocity().lengthSquared()==0) {  // Si la bola esta quieta
-        shooting = true;
+        isShooting = true;
         mousePressTime = ofGetElapsedTimeMillis();
     }
 }
 
 //--------------------------------------------------------------
 void ofApp::mouseReleased(int x, int y, int button){
-    if (shooting) {
+    if (isShooting) {
         ofLog(OF_LOG_NOTICE, "Mouse click");
         // TODO: comprobar si x, y estan dentro del viewportCentral y que son x e y relativos a el
         
@@ -146,7 +149,7 @@ void ofApp::mouseReleased(int x, int y, int button){
         ball.setVelocity(direction * shootPower);
         //ball.addForce(direction, shootPower*100);
         
-        shooting = false;
+        isShooting = false;
     }
 }
 
